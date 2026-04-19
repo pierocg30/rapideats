@@ -1,0 +1,16 @@
+project_id = "rmpzoevotucuhpgvtzbn"
+
+[functions.publish-event]
+verify_jwt = false
+
+[functions.matching-consumer]
+verify_jwt = false
+
+[functions.notifications-consumer]
+verify_jwt = false
+
+[functions.analytics-consumer]
+verify_jwt = false
+
+[functions.refund-saga]
+verify_jwt = false

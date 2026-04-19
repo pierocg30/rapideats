@@ -14,7 +14,317 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      circuit_state: {
+        Row: {
+          failures: number
+          opened_at: string | null
+          service: string
+          status: Database["public"]["Enums"]["circuit_status"]
+          successes: number
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          failures?: number
+          opened_at?: string | null
+          service: string
+          status?: Database["public"]["Enums"]["circuit_status"]
+          successes?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          failures?: number
+          opened_at?: string | null
+          service?: string
+          status?: Database["public"]["Enums"]["circuit_status"]
+          successes?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      dlq: {
+        Row: {
+          attempts: number
+          consumer: string
+          created_at: string
+          error: string | null
+          event_id: string | null
+          id: string
+          next_retry_at: string | null
+          payload: Json
+          topic: string
+        }
+        Insert: {
+          attempts?: number
+          consumer: string
+          created_at?: string
+          error?: string | null
+          event_id?: string | null
+          id?: string
+          next_retry_at?: string | null
+          payload: Json
+          topic: string
+        }
+        Update: {
+          attempts?: number
+          consumer?: string
+          created_at?: string
+          error?: string | null
+          event_id?: string | null
+          id?: string
+          next_retry_at?: string | null
+          payload?: Json
+          topic?: string
+        }
+        Relationships: []
+      }
+      drivers: {
+        Row: {
+          available: boolean
+          created_at: string
+          current_lat: number | null
+          current_lng: number | null
+          id: string
+          name: string
+        }
+        Insert: {
+          available?: boolean
+          created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
+          id?: string
+          name: string
+        }
+        Update: {
+          available?: boolean
+          created_at?: string
+          current_lat?: number | null
+          current_lng?: number | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      events: {
+        Row: {
+          aggregate_id: string | null
+          created_at: string
+          headers: Json
+          id: string
+          payload: Json
+          topic: string
+        }
+        Insert: {
+          aggregate_id?: string | null
+          created_at?: string
+          headers?: Json
+          id?: string
+          payload?: Json
+          topic: string
+        }
+        Update: {
+          aggregate_id?: string | null
+          created_at?: string
+          headers?: Json
+          id?: string
+          payload?: Json
+          topic?: string
+        }
+        Relationships: []
+      }
+      gps_pings: {
+        Row: {
+          created_at: string
+          driver_id: string | null
+          id: number
+          lat: number
+          lng: number
+          order_id: string
+        }
+        Insert: {
+          created_at?: string
+          driver_id?: string | null
+          id?: number
+          lat: number
+          lng: number
+          order_id: string
+        }
+        Update: {
+          created_at?: string
+          driver_id?: string | null
+          id?: number
+          lat?: number
+          lng?: number
+          order_id?: string
+        }
+        Relationships: []
+      }
+      matching_state: {
+        Row: {
+          expires_at: string
+          matched_at: string | null
+          order_id: string
+          payment_done: boolean
+          restaurant_done: boolean
+        }
+        Insert: {
+          expires_at?: string
+          matched_at?: string | null
+          order_id: string
+          payment_done?: boolean
+          restaurant_done?: boolean
+        }
+        Update: {
+          expires_at?: string
+          matched_at?: string | null
+          order_id?: string
+          payment_done?: boolean
+          restaurant_done?: boolean
+        }
+        Relationships: []
+      }
+      orders: {
+        Row: {
+          created_at: string
+          customer_name: string
+          driver_id: string | null
+          dropoff_lat: number | null
+          dropoff_lng: number | null
+          id: string
+          items: Json
+          pickup_lat: number | null
+          pickup_lng: number | null
+          restaurant_name: string
+          status: Database["public"]["Enums"]["order_status"]
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_name: string
+          driver_id?: string | null
+          dropoff_lat?: number | null
+          dropoff_lng?: number | null
+          id?: string
+          items?: Json
+          pickup_lat?: number | null
+          pickup_lng?: number | null
+          restaurant_name: string
+          status?: Database["public"]["Enums"]["order_status"]
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_name?: string
+          driver_id?: string | null
+          dropoff_lat?: number | null
+          dropoff_lng?: number | null
+          id?: string
+          items?: Json
+          pickup_lat?: number | null
+          pickup_lng?: number | null
+          restaurant_name?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          total?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      processed_events: {
+        Row: {
+          consumer: string
+          event_id: string
+          processed_at: string
+        }
+        Insert: {
+          consumer: string
+          event_id: string
+          processed_at?: string
+        }
+        Update: {
+          consumer?: string
+          event_id?: string
+          processed_at?: string
+        }
+        Relationships: []
+      }
+      saga_executions: {
+        Row: {
+          context: Json
+          created_at: string
+          current_step: number
+          id: string
+          order_id: string | null
+          saga_type: string
+          status: Database["public"]["Enums"]["saga_status"]
+          updated_at: string
+        }
+        Insert: {
+          context?: Json
+          created_at?: string
+          current_step?: number
+          id?: string
+          order_id?: string | null
+          saga_type: string
+          status?: Database["public"]["Enums"]["saga_status"]
+          updated_at?: string
+        }
+        Update: {
+          context?: Json
+          created_at?: string
+          current_step?: number
+          id?: string
+          order_id?: string | null
+          saga_type?: string
+          status?: Database["public"]["Enums"]["saga_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      saga_steps: {
+        Row: {
+          created_at: string
+          error: string | null
+          id: string
+          name: string
+          output: Json | null
+          saga_id: string
+          status: string
+          step_index: number
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          name: string
+          output?: Json | null
+          saga_id: string
+          status: string
+          step_index: number
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          id?: string
+          name?: string
+          output?: Json | null
+          saga_id?: string
+          status?: string
+          step_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saga_steps_saga_id_fkey"
+            columns: ["saga_id"]
+            isOneToOne: false
+            referencedRelation: "saga_executions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +333,19 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      circuit_status: "closed" | "open" | "half_open"
+      order_status:
+        | "created"
+        | "payment_pending"
+        | "payment_processed"
+        | "restaurant_confirmed"
+        | "matched"
+        | "picked_up"
+        | "in_transit"
+        | "delivered"
+        | "cancelled"
+        | "refunded"
+      saga_status: "running" | "completed" | "failed" | "compensated"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +472,21 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      circuit_status: ["closed", "open", "half_open"],
+      order_status: [
+        "created",
+        "payment_pending",
+        "payment_processed",
+        "restaurant_confirmed",
+        "matched",
+        "picked_up",
+        "in_transit",
+        "delivered",
+        "cancelled",
+        "refunded",
+      ],
+      saga_status: ["running", "completed", "failed", "compensated"],
+    },
   },
 } as const

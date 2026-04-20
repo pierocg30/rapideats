@@ -5,28 +5,6 @@ import { AppHeader } from "@/components/AppHeader";
 import { MiniMap } from "@/components/MiniMap";
 import { subscribeEvents, subscribeGps, haversineKm, type EventRow } from "@/lib/eventosService";
 
-const TOPIC_META: Record<string, { label: string; icon: string; tone: string }> = {
-  "pedido.creado": { label: "Pedido creado", icon: "🧾", tone: "bg-muted text-foreground" },
-  "pago.procesado": { label: "Pago confirmado", icon: "💳", tone: "bg-emerald-100 text-emerald-700" },
-  "pedido.aceptado_por_restaurante": { label: "Restaurante aceptó tu pedido", icon: "✅", tone: "bg-emerald-100 text-emerald-700" },
-  "pedido.en_preparacion": { label: "Preparando tu pedido", icon: "👨‍🍳", tone: "bg-amber-100 text-amber-700" },
-  "repartidor.asignado": { label: "Repartidor asignado", icon: "🛵", tone: "bg-sky-100 text-sky-700" },
-  "pedido.recogido": { label: "Pedido recogido del local", icon: "📦", tone: "bg-indigo-100 text-indigo-700" },
-  "pedido.en_camino": { label: "En camino a tu casa", icon: "🚚", tone: "bg-blue-100 text-blue-700" },
-  "pedido.entregado": { label: "¡Pedido entregado!", icon: "🎉", tone: "bg-primary/15 text-primary" },
-};
-
-function prettyTopic(topic: string) {
-  return TOPIC_META[topic] ?? {
-    label: topic.replace(/\./g, " · ").replace(/_/g, " "),
-    icon: "📌",
-    tone: "bg-muted text-foreground",
-  };
-}
-
-function formatTime(iso: string) {
-  return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-}
 
 export const Route = createFileRoute("/track/$id")({
   head: () => ({ meta: [{ title: "Sigue tu pedido — RapidEats" }] }),
@@ -175,7 +153,7 @@ function TrackPage() {
         </section>
 
         {/* Resumen */}
-        <section className="mt-6 grid gap-4 sm:grid-cols-2">
+        <section className="mt-6">
           <div className="rounded-2xl border bg-card p-4">
             <h3 className="mb-2 text-sm font-semibold">Tu pedido</h3>
             <div className="text-sm text-muted-foreground">{order.restaurant_name}</div>
@@ -190,33 +168,6 @@ function TrackPage() {
               <span>Total</span><span>${Number(order.total).toFixed(0)}</span>
             </div>
           </div>
-
-          <div className="rounded-2xl border bg-card p-4">
-            <h3 className="mb-3 text-sm font-semibold">Línea de tiempo</h3>
-            <ol className="relative max-h-72 space-y-3 overflow-y-auto pr-2">
-              {events.length === 0 && (
-                <li className="text-sm text-muted-foreground">Aún no hay actualizaciones…</li>
-              )}
-              {events.map((e, i) => {
-                const meta = prettyTopic(e.topic);
-                const isLatest = i === 0;
-                return (
-                  <li key={e.id} className="flex items-start gap-3">
-                    <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-base ${meta.tone} ${isLatest ? "ring-2 ring-primary/40" : ""}`}>
-                      {meta.icon}
-                    </div>
-                    <div className="flex-1 pt-1">
-                      <div className={`text-sm ${isLatest ? "font-semibold text-foreground" : "font-medium text-foreground/90"}`}>
-                        {meta.label}
-                      </div>
-                      <div className="text-xs text-muted-foreground">{formatTime(e.created_at)}</div>
-                    </div>
-                  </li>
-                );
-              })}
-            </ol>
-          </div>
-
         </section>
 
         {isDone && (

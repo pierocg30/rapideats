@@ -1,37 +1,68 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 
 type LatLng = { lat: number; lng: number };
 
-// Mini mapa SVG (sin dependencias externas) — proyección equirectangular local.
-export function MiniMap({
-  pickup, dropoff, driver, height = 260,
-}: { pickup: LatLng; dropoff: LatLng; driver?: LatLng | null; height?: number }) {
-  const points = [pickup, dropoff, driver].filter(Boolean) as LatLng[];
-  const lats = points.map((p) => p.lat);
-  const lngs = points.map((p) => p.lng);
-  const pad = 0.005;
-  const minLat = Math.min(...lats) - pad, maxLat = Math.max(...lats) + pad;
-  const minLng = Math.min(...lngs) - pad, maxLng = Math.max(...lngs) + pad;
-  const W = 600, H = height;
-  const proj = (p: LatLng) => ({
-    x: ((p.lng - minLng) / (maxLng - minLng || 1)) * W,
-    y: H - ((p.lat - minLat) / (maxLat - minLat || 1)) * H,
+// Iconos personalizados (divIcon con emoji para evitar problemas de assets)
+const makeIcon = (emoji: string, bg: string, size = 36) =>
+  L.divIcon({
+    className: "rapideats-marker",
+    html: `<div style="
+      width:${size}px;height:${size}px;border-radius:9999px;
+      background:${bg};display:flex;align-items:center;justify-content:center;
+      font-size:${size * 0.55}px;border:3px solid white;
+      box-shadow:0 4px 12px rgba(0,0,0,0.25);
+    ">${emoji}</div>`,
+    iconSize: [size, size],
+    iconAnchor: [size / 2, size / 2],
   });
-  const P = proj(pickup), D = proj(dropoff), R = driver ? proj(driver) : null;
 
-  // animar driver
-  const [render, setRender] = useState<LatLng | null>(driver ?? null);
+const restaurantIcon = makeIcon("🍔", "#10b981");
+const customerIcon = makeIcon("🏠", "#ef4444");
+const driverIcon = makeIcon("🛵", "#f59e0b", 42);
+
+function FitBounds({ points }: { points: LatLng[] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (points.length < 2) return;
+    const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lng] as [number, number]));
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+  }, [map, JSON.stringify(points)]);
+  return null;
+}
+
+export function MiniMap({
+  pickup,
+  dropoff,
+  driver,
+  height = 320,
+}: {
+  pickup: LatLng;
+  dropoff: LatLng;
+  driver?: LatLng | null;
+  height?: number;
+}) {
+  // Interpolación suave de la posición del repartidor
+  const [smooth, setSmooth] = useState<LatLng | null>(driver ?? null);
   const prev = useRef<LatLng | null>(driver ?? null);
+
   useEffect(() => {
     if (!driver) return;
     const from = prev.current ?? driver;
     const to = driver;
     const start = performance.now();
-    const dur = 1500;
+    const dur = 1400;
     let raf = 0;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / dur);
-      setRender({ lat: from.lat + (to.lat - from.lat) * t, lng: from.lng + (to.lng - from.lng) * t });
+      // ease-out
+      const e = 1 - Math.pow(1 - t, 3);
+      setSmooth({
+        lat: from.lat + (to.lat - from.lat) * e,
+        lng: from.lng + (to.lng - from.lng) * e,
+      });
       if (t < 1) raf = requestAnimationFrame(tick);
       else prev.current = to;
     };
@@ -39,31 +70,46 @@ export function MiniMap({
     return () => cancelAnimationFrame(raf);
   }, [driver?.lat, driver?.lng]);
 
-  const RR = render ? proj(render) : R;
+  const center = useMemo<[number, number]>(
+    () => [(pickup.lat + dropoff.lat) / 2, (pickup.lng + dropoff.lng) / 2],
+    [pickup.lat, pickup.lng, dropoff.lat, dropoff.lng],
+  );
+
+  const allPoints = [pickup, dropoff, smooth].filter(Boolean) as LatLng[];
+
+  // Ruta: si hay repartidor, traza pickup → driver → dropoff; si no, pickup → dropoff
+  const routeLine: [number, number][] = smooth
+    ? [
+        [pickup.lat, pickup.lng],
+        [smooth.lat, smooth.lng],
+        [dropoff.lat, dropoff.lng],
+      ]
+    : [
+        [pickup.lat, pickup.lng],
+        [dropoff.lat, dropoff.lng],
+      ];
 
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="w-full rounded-lg border bg-muted/30" style={{ height }}>
-      <defs>
-        <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-          <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(var(--border))" strokeWidth="0.5" opacity="0.4"/>
-        </pattern>
-      </defs>
-      <rect width={W} height={H} fill="url(#grid)" />
-      <line x1={P.x} y1={P.y} x2={D.x} y2={D.y} stroke="oklch(0.7 0.15 250)" strokeWidth="2" strokeDasharray="6 4"/>
-      <g>
-        <circle cx={P.x} cy={P.y} r="9" fill="oklch(0.65 0.18 145)" />
-        <text x={P.x + 12} y={P.y + 4} fontSize="11" fill="currentColor">Restaurante</text>
-      </g>
-      <g>
-        <circle cx={D.x} cy={D.y} r="9" fill="oklch(0.6 0.22 25)" />
-        <text x={D.x + 12} y={D.y + 4} fontSize="11" fill="currentColor">Cliente</text>
-      </g>
-      {RR && (
-        <g>
-          <circle cx={RR.x} cy={RR.y} r="11" fill="oklch(0.7 0.18 60)" stroke="white" strokeWidth="2"/>
-          <text x={RR.x + 14} y={RR.y + 4} fontSize="11" fill="currentColor">🛵 Repartidor</text>
-        </g>
-      )}
-    </svg>
+    <div className="overflow-hidden rounded-xl border" style={{ height }}>
+      <MapContainer
+        center={center}
+        zoom={14}
+        scrollWheelZoom={false}
+        style={{ height: "100%", width: "100%" }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <Polyline
+          positions={routeLine}
+          pathOptions={{ color: "#3b82f6", weight: 4, opacity: 0.75, dashArray: "8 8" }}
+        />
+        <Marker position={[pickup.lat, pickup.lng]} icon={restaurantIcon} />
+        <Marker position={[dropoff.lat, dropoff.lng]} icon={customerIcon} />
+        {smooth && <Marker position={[smooth.lat, smooth.lng]} icon={driverIcon} />}
+        <FitBounds points={allPoints} />
+      </MapContainer>
+    </div>
   );
 }

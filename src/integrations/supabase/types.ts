@@ -189,13 +189,17 @@ export type Database = {
         Row: {
           created_at: string
           customer_name: string
+          delivery_address: string | null
           driver_id: string | null
           dropoff_lat: number | null
           dropoff_lng: number | null
+          eta_minutes: number | null
           id: string
           items: Json
+          notes: string | null
           pickup_lat: number | null
           pickup_lng: number | null
+          restaurant_id: string | null
           restaurant_name: string
           status: Database["public"]["Enums"]["order_status"]
           total: number
@@ -204,13 +208,17 @@ export type Database = {
         Insert: {
           created_at?: string
           customer_name: string
+          delivery_address?: string | null
           driver_id?: string | null
           dropoff_lat?: number | null
           dropoff_lng?: number | null
+          eta_minutes?: number | null
           id?: string
           items?: Json
+          notes?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
+          restaurant_id?: string | null
           restaurant_name: string
           status?: Database["public"]["Enums"]["order_status"]
           total?: number
@@ -219,13 +227,17 @@ export type Database = {
         Update: {
           created_at?: string
           customer_name?: string
+          delivery_address?: string | null
           driver_id?: string | null
           dropoff_lat?: number | null
           dropoff_lng?: number | null
+          eta_minutes?: number | null
           id?: string
           items?: Json
+          notes?: string | null
           pickup_lat?: number | null
           pickup_lng?: number | null
+          restaurant_id?: string | null
           restaurant_name?: string
           status?: Database["public"]["Enums"]["order_status"]
           total?: number
@@ -248,6 +260,86 @@ export type Database = {
           consumer?: string
           event_id?: string
           processed_at?: string
+        }
+        Relationships: []
+      }
+      products: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          name: string
+          price: number
+          restaurant_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name: string
+          price: number
+          restaurant_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          name?: string
+          price?: number
+          restaurant_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_restaurant_id_fkey"
+            columns: ["restaurant_id"]
+            isOneToOne: false
+            referencedRelation: "restaurants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      restaurants: {
+        Row: {
+          category: string
+          created_at: string
+          delivery_fee: number
+          delivery_minutes: number
+          id: string
+          image_url: string | null
+          lat: number
+          lng: number
+          name: string
+          rating: number
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          delivery_fee?: number
+          delivery_minutes?: number
+          id?: string
+          image_url?: string | null
+          lat?: number
+          lng?: number
+          name: string
+          rating?: number
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          delivery_fee?: number
+          delivery_minutes?: number
+          id?: string
+          image_url?: string | null
+          lat?: number
+          lng?: number
+          name?: string
+          rating?: number
         }
         Relationships: []
       }

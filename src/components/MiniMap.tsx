@@ -1,37 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { MapContainer, TileLayer, Marker, Polyline, useMap } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 
 type LatLng = { lat: number; lng: number };
-
-// Iconos personalizados (divIcon con emoji para evitar problemas de assets)
-const makeIcon = (emoji: string, bg: string, size = 36) =>
-  L.divIcon({
-    className: "rapideats-marker",
-    html: `<div style="
-      width:${size}px;height:${size}px;border-radius:9999px;
-      background:${bg};display:flex;align-items:center;justify-content:center;
-      font-size:${size * 0.55}px;border:3px solid white;
-      box-shadow:0 4px 12px rgba(0,0,0,0.25);
-    ">${emoji}</div>`,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
-  });
-
-const restaurantIcon = makeIcon("🍔", "#10b981");
-const customerIcon = makeIcon("🏠", "#ef4444");
-const driverIcon = makeIcon("🛵", "#f59e0b", 42);
-
-function FitBounds({ points }: { points: LatLng[] }) {
-  const map = useMap();
-  useEffect(() => {
-    if (points.length < 2) return;
-    const bounds = L.latLngBounds(points.map((p) => [p.lat, p.lng] as [number, number]));
-    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
-  }, [map, JSON.stringify(points)]);
-  return null;
-}
 
 export function MiniMap({
   pickup,
@@ -44,10 +13,26 @@ export function MiniMap({
   driver?: LatLng | null;
   height?: number;
 }) {
-  // Interpolación suave de la posición del repartidor
+  const [Lib, setLib] = useState<any>(null);
+
+  // Carga Leaflet + react-leaflet solo en cliente (evita "window is not defined" en SSR)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const [L, RL] = await Promise.all([
+        import("leaflet"),
+        import("react-leaflet"),
+        import("leaflet/dist/leaflet.css" as any),
+      ]);
+      if (!mounted) return;
+      setLib({ L: L.default ?? L, RL });
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  // Interpolación suave del repartidor
   const [smooth, setSmooth] = useState<LatLng | null>(driver ?? null);
   const prev = useRef<LatLng | null>(driver ?? null);
-
   useEffect(() => {
     if (!driver) return;
     const from = prev.current ?? driver;
@@ -57,7 +42,6 @@ export function MiniMap({
     let raf = 0;
     const tick = (now: number) => {
       const t = Math.min(1, (now - start) / dur);
-      // ease-out
       const e = 1 - Math.pow(1 - t, 3);
       setSmooth({
         lat: from.lat + (to.lat - from.lat) * e,
@@ -75,19 +59,46 @@ export function MiniMap({
     [pickup.lat, pickup.lng, dropoff.lat, dropoff.lng],
   );
 
-  const allPoints = [pickup, dropoff, smooth].filter(Boolean) as LatLng[];
+  if (!Lib) {
+    return (
+      <div
+        className="flex items-center justify-center rounded-xl border bg-muted/30 text-sm text-muted-foreground"
+        style={{ height }}
+      >
+        Cargando mapa…
+      </div>
+    );
+  }
 
-  // Ruta: si hay repartidor, traza pickup → driver → dropoff; si no, pickup → dropoff
+  const { L, RL } = Lib;
+  const { MapContainer, TileLayer, Marker, Polyline, useMap } = RL;
+
+  const makeIcon = (emoji: string, bg: string, size = 36) =>
+    L.divIcon({
+      className: "rapideats-marker",
+      html: `<div style="width:${size}px;height:${size}px;border-radius:9999px;background:${bg};display:flex;align-items:center;justify-content:center;font-size:${size * 0.55}px;border:3px solid white;box-shadow:0 4px 12px rgba(0,0,0,0.25);">${emoji}</div>`,
+      iconSize: [size, size],
+      iconAnchor: [size / 2, size / 2],
+    });
+
+  const restaurantIcon = makeIcon("🍔", "#10b981");
+  const customerIcon = makeIcon("🏠", "#ef4444");
+  const driverIcon = makeIcon("🛵", "#f59e0b", 42);
+
+  function FitBounds({ points }: { points: LatLng[] }) {
+    const map = useMap();
+    useEffect(() => {
+      if (points.length < 2) return;
+      const bounds = L.latLngBounds(points.map((p: LatLng) => [p.lat, p.lng]));
+      map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+    }, [map, JSON.stringify(points)]);
+    return null;
+  }
+
+  const allPoints = [pickup, dropoff, smooth].filter(Boolean) as LatLng[];
   const routeLine: [number, number][] = smooth
-    ? [
-        [pickup.lat, pickup.lng],
-        [smooth.lat, smooth.lng],
-        [dropoff.lat, dropoff.lng],
-      ]
-    : [
-        [pickup.lat, pickup.lng],
-        [dropoff.lat, dropoff.lng],
-      ];
+    ? [[pickup.lat, pickup.lng], [smooth.lat, smooth.lng], [dropoff.lat, dropoff.lng]]
+    : [[pickup.lat, pickup.lng], [dropoff.lat, dropoff.lng]];
 
   return (
     <div className="overflow-hidden rounded-xl border" style={{ height }}>
@@ -98,7 +109,7 @@ export function MiniMap({
         style={{ height: "100%", width: "100%" }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          attribution='&copy; OpenStreetMap'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         <Polyline

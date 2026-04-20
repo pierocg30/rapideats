@@ -49,13 +49,13 @@ function TrackPage() {
   // Cargar orden + suscripciones
   useEffect(() => {
     supabase.from("orders").select("*").eq("id", id).single()
-      .then(({ data }) => setOrder(data as Order));
+      .then(({ data }) => setOrder(data as unknown as Order));
     supabase.from("events").select("*").eq("aggregate_id", id).order("created_at", { ascending: false }).limit(50)
       .then(({ data }) => setEvents((data ?? []) as EventRow[]));
 
     const ch = supabase.channel(`order:${id}`)
       .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders", filter: `id=eq.${id}` },
-        (p) => setOrder(p.new as Order))
+        (p) => setOrder(p.new as unknown as Order))
       .subscribe();
 
     const unsubE = subscribeEvents((e) => setEvents((prev) => [e, ...prev].slice(0, 100)), id);

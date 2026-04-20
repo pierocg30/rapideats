@@ -120,15 +120,9 @@ function LeafletMap({
       m.driver.setLatLng([driver.lat, driver.lng]);
     }
 
-    // Ruta dinámica: pickup → driver → dropoff
-    if (m.route) {
-      m.route.setLatLngs([
-        [pickup.lat, pickup.lng],
-        [driver.lat, driver.lng],
-        [dropoff.lat, dropoff.lng],
-      ]);
-    }
-  }, [ready, driver?.lat, driver?.lng, pickup.lat, pickup.lng, dropoff.lat, dropoff.lng]);
+    // La ruta (m.route) es la polilínea real por calles (OSRM) y se mantiene fija;
+    // el marcador del repartidor avanza sobre ella.
+  }, [ready, driver?.lat, driver?.lng]);
 
   return <div ref={containerRef} style={{ height: "100%", width: "100%" }} />;
 }

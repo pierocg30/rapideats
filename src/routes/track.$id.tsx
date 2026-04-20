@@ -192,17 +192,31 @@ function TrackPage() {
           </div>
 
           <div className="rounded-2xl border bg-card p-4">
-            <h3 className="mb-2 text-sm font-semibold">Línea de tiempo</h3>
-            <ol className="max-h-64 space-y-2 overflow-y-auto pr-2 text-xs">
-              {events.length === 0 && <li className="text-muted-foreground">Sin eventos aún…</li>}
-              {events.map((e) => (
-                <li key={e.id} className="rounded-lg border-l-2 border-primary bg-muted/30 p-2">
-                  <div className="font-mono text-[11px] text-primary">{e.topic}</div>
-                  <div className="text-muted-foreground">{new Date(e.created_at).toLocaleTimeString()}</div>
-                </li>
-              ))}
+            <h3 className="mb-3 text-sm font-semibold">Línea de tiempo</h3>
+            <ol className="relative max-h-72 space-y-3 overflow-y-auto pr-2">
+              {events.length === 0 && (
+                <li className="text-sm text-muted-foreground">Aún no hay actualizaciones…</li>
+              )}
+              {events.map((e, i) => {
+                const meta = prettyTopic(e.topic);
+                const isLatest = i === 0;
+                return (
+                  <li key={e.id} className="flex items-start gap-3">
+                    <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-base ${meta.tone} ${isLatest ? "ring-2 ring-primary/40" : ""}`}>
+                      {meta.icon}
+                    </div>
+                    <div className="flex-1 pt-1">
+                      <div className={`text-sm ${isLatest ? "font-semibold text-foreground" : "font-medium text-foreground/90"}`}>
+                        {meta.label}
+                      </div>
+                      <div className="text-xs text-muted-foreground">{formatTime(e.created_at)}</div>
+                    </div>
+                  </li>
+                );
+              })}
             </ol>
           </div>
+
         </section>
 
         {isDone && (

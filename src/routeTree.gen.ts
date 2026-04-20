@@ -9,32 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RestauranteRouteImport } from './routes/restaurante'
-import { Route as RepartidorRouteImport } from './routes/repartidor'
-import { Route as ClienteRouteImport } from './routes/cliente'
-import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 
-const RestauranteRoute = RestauranteRouteImport.update({
-  id: '/restaurante',
-  path: '/restaurante',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RepartidorRoute = RepartidorRouteImport.update({
-  id: '/repartidor',
-  path: '/repartidor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClienteRoute = ClienteRouteImport.update({
-  id: '/cliente',
-  path: '/cliente',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -43,72 +19,28 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/cliente': typeof ClienteRoute
-  '/repartidor': typeof RepartidorRoute
-  '/restaurante': typeof RestauranteRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/cliente': typeof ClienteRoute
-  '/repartidor': typeof RepartidorRoute
-  '/restaurante': typeof RestauranteRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/cliente': typeof ClienteRoute
-  '/repartidor': typeof RepartidorRoute
-  '/restaurante': typeof RestauranteRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/cliente' | '/repartidor' | '/restaurante'
+  fullPaths: '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/cliente' | '/repartidor' | '/restaurante'
-  id: '__root__' | '/' | '/admin' | '/cliente' | '/repartidor' | '/restaurante'
+  to: '/'
+  id: '__root__' | '/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
-  ClienteRoute: typeof ClienteRoute
-  RepartidorRoute: typeof RepartidorRoute
-  RestauranteRoute: typeof RestauranteRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/restaurante': {
-      id: '/restaurante'
-      path: '/restaurante'
-      fullPath: '/restaurante'
-      preLoaderRoute: typeof RestauranteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/repartidor': {
-      id: '/repartidor'
-      path: '/repartidor'
-      fullPath: '/repartidor'
-      preLoaderRoute: typeof RepartidorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cliente': {
-      id: '/cliente'
-      path: '/cliente'
-      fullPath: '/cliente'
-      preLoaderRoute: typeof ClienteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -121,10 +53,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
-  ClienteRoute: ClienteRoute,
-  RepartidorRoute: RepartidorRoute,
-  RestauranteRoute: RestauranteRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

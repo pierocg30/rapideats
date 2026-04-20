@@ -62,13 +62,29 @@ function LeafletMap({
       markersRef.current.pickup = L.marker([pickup.lat, pickup.lng], { icon: makeIcon("🍔", "#10b981") }).addTo(map).bindPopup("Restaurante");
       markersRef.current.dropoff = L.marker([dropoff.lat, dropoff.lng], { icon: makeIcon("🏠", "#ef4444") }).addTo(map).bindPopup("Tu dirección");
 
-      const initialRoute: [number, number][] = [[pickup.lat, pickup.lng], [dropoff.lat, dropoff.lng]];
-      markersRef.current.route = L.polyline(initialRoute, {
-        color: "#3b82f6", weight: 5, opacity: 0.8, dashArray: "10 8",
-      }).addTo(map);
+      // Ruta inicial: línea recta como placeholder, se reemplaza por la real (OSRM) abajo
+      markersRef.current.route = L.polyline(
+        [[pickup.lat, pickup.lng], [dropoff.lat, dropoff.lng]],
+        { color: "#3b82f6", weight: 5, opacity: 0.85 },
+      ).addTo(map);
 
       const bounds = L.latLngBounds([[pickup.lat, pickup.lng], [dropoff.lat, dropoff.lng]]);
       map.fitBounds(bounds, { padding: [40, 40], maxZoom: 15 });
+
+      // Cargar ruta real por calles desde OSRM
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${pickup.lng},${pickup.lat};${dropoff.lng},${dropoff.lat}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const json = await res.json();
+        const coords = json?.routes?.[0]?.geometry?.coordinates as [number, number][] | undefined;
+        if (coords && coords.length >= 2 && markersRef.current.route) {
+          const latlngs = coords.map(([lng, lat]) => [lat, lng]) as [number, number][];
+          markersRef.current.route.setLatLngs(latlngs);
+          (markersRef.current as any).baseRoute = latlngs;
+        }
+      } catch (e) {
+        console.warn("OSRM route fetch failed", e);
+      }
 
       setReady(true);
     })();
@@ -104,15 +120,9 @@ function LeafletMap({
       m.driver.setLatLng([driver.lat, driver.lng]);
     }
 
-    // Ruta dinámica: pickup → driver → dropoff
-    if (m.route) {
-      m.route.setLatLngs([
-        [pickup.lat, pickup.lng],
-        [driver.lat, driver.lng],
-        [dropoff.lat, dropoff.lng],
-      ]);
-    }
-  }, [ready, driver?.lat, driver?.lng, pickup.lat, pickup.lng, dropoff.lat, dropoff.lng]);
+    // La ruta (m.route) es la polilínea real por calles (OSRM) y se mantiene fija;
+    // el marcador del repartidor avanza sobre ella.
+  }, [ready, driver?.lat, driver?.lng]);
 
   return <div ref={containerRef} style={{ height: "100%", width: "100%" }} />;
 }

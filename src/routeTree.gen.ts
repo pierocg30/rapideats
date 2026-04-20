@@ -9,30 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RestauranteRouteImport } from './routes/restaurante'
-import { Route as RepartidorRouteImport } from './routes/repartidor'
-import { Route as ClienteRouteImport } from './routes/cliente'
-import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CartRouteImport } from './routes/cart'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as TrackIdRouteImport } from './routes/track.$id'
+import { Route as RestaurantIdRouteImport } from './routes/restaurant.$id'
 
-const RestauranteRoute = RestauranteRouteImport.update({
-  id: '/restaurante',
-  path: '/restaurante',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RepartidorRoute = RepartidorRouteImport.update({
-  id: '/repartidor',
-  path: '/repartidor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ClienteRoute = ClienteRouteImport.update({
-  id: '/cliente',
-  path: '/cliente',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
+const CartRoute = CartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -40,73 +24,58 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrackIdRoute = TrackIdRouteImport.update({
+  id: '/track/$id',
+  path: '/track/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RestaurantIdRoute = RestaurantIdRouteImport.update({
+  id: '/restaurant/$id',
+  path: '/restaurant/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/cliente': typeof ClienteRoute
-  '/repartidor': typeof RepartidorRoute
-  '/restaurante': typeof RestauranteRoute
+  '/cart': typeof CartRoute
+  '/restaurant/$id': typeof RestaurantIdRoute
+  '/track/$id': typeof TrackIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/cliente': typeof ClienteRoute
-  '/repartidor': typeof RepartidorRoute
-  '/restaurante': typeof RestauranteRoute
+  '/cart': typeof CartRoute
+  '/restaurant/$id': typeof RestaurantIdRoute
+  '/track/$id': typeof TrackIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/admin': typeof AdminRoute
-  '/cliente': typeof ClienteRoute
-  '/repartidor': typeof RepartidorRoute
-  '/restaurante': typeof RestauranteRoute
+  '/cart': typeof CartRoute
+  '/restaurant/$id': typeof RestaurantIdRoute
+  '/track/$id': typeof TrackIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/cliente' | '/repartidor' | '/restaurante'
+  fullPaths: '/' | '/cart' | '/restaurant/$id' | '/track/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/cliente' | '/repartidor' | '/restaurante'
-  id: '__root__' | '/' | '/admin' | '/cliente' | '/repartidor' | '/restaurante'
+  to: '/' | '/cart' | '/restaurant/$id' | '/track/$id'
+  id: '__root__' | '/' | '/cart' | '/restaurant/$id' | '/track/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdminRoute: typeof AdminRoute
-  ClienteRoute: typeof ClienteRoute
-  RepartidorRoute: typeof RepartidorRoute
-  RestauranteRoute: typeof RestauranteRoute
+  CartRoute: typeof CartRoute
+  RestaurantIdRoute: typeof RestaurantIdRoute
+  TrackIdRoute: typeof TrackIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/restaurante': {
-      id: '/restaurante'
-      path: '/restaurante'
-      fullPath: '/restaurante'
-      preLoaderRoute: typeof RestauranteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/repartidor': {
-      id: '/repartidor'
-      path: '/repartidor'
-      fullPath: '/repartidor'
-      preLoaderRoute: typeof RepartidorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/cliente': {
-      id: '/cliente'
-      path: '/cliente'
-      fullPath: '/cliente'
-      preLoaderRoute: typeof ClienteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/cart': {
+      id: '/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof CartRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -116,15 +85,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/track/$id': {
+      id: '/track/$id'
+      path: '/track/$id'
+      fullPath: '/track/$id'
+      preLoaderRoute: typeof TrackIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/restaurant/$id': {
+      id: '/restaurant/$id'
+      path: '/restaurant/$id'
+      fullPath: '/restaurant/$id'
+      preLoaderRoute: typeof RestaurantIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdminRoute: AdminRoute,
-  ClienteRoute: ClienteRoute,
-  RepartidorRoute: RepartidorRoute,
-  RestauranteRoute: RestauranteRoute,
+  CartRoute: CartRoute,
+  RestaurantIdRoute: RestaurantIdRoute,
+  TrackIdRoute: TrackIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
